@@ -1,27 +1,27 @@
 /*
- Copyright 2017 Ryuichi Laboratories and the Yanagiba project contributors
- 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- 
- http://www.apache.org/licenses/LICENSE-2.0
- 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+   Copyright 2017 Ryuichi Laboratories and the Yanagiba project contributors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 
 import AST
 
 extension Tokenizer {
-    
+
     // TODO: Review
     open func tokenize(_ declaration: Declaration) -> [Token] {
         return [declaration.newToken(.identifier, generate(declaration))]
-    }    
+    }
     open func generate(_ declaration: Declaration) -> String {
         switch declaration {
         case let decl as ClassDeclaration:
@@ -58,7 +58,7 @@ extension Tokenizer {
             return declaration.textDescription // no implementation for this declaration, just continue
         }
     }
-    
+
     // TODO: Review
     open func tokenize(_ topLevelDeclaration: TopLevelDeclaration) -> [Token] {
         return [topLevelDeclaration.newToken(.identifier, generate(topLevelDeclaration))]
@@ -77,60 +77,60 @@ extension Tokenizer {
         }
         return "{\n\(codeBlock.statements.map { generate($0, node: codeBlock) }.joined(separator: "\n").indent)\n}"
     }
-    
+
     open func generate(_ block: GetterSetterBlock.GetterClause, node: ASTNode) -> String {
         let attrsText = block.attributes.isEmpty ? "" : "\(generate(block.attributes, node: node)) "
         let modifierText = block.mutationModifier.map({ "\(generate($0)) " }) ?? ""
         return "\(attrsText)\(modifierText)get \(generate(block.codeBlock))"
     }
-    
+
     open func generate(_ block: GetterSetterBlock.SetterClause, node: ASTNode) -> String {
         let attrsText = block.attributes.isEmpty ? "" : "\(generate(block.attributes, node: node)) "
         let modifierText = block.mutationModifier.map({ "\(generate($0)) " }) ?? ""
         let nameText = block.name.map({ "(\($0))" }) ?? ""
         return "\(attrsText)\(modifierText)set\(nameText) \(generate(block.codeBlock))"
     }
-    
+
     open func generate(_ block: GetterSetterBlock, node: ASTNode) -> String {
         let setterStr = block.setter.map({ "\n\(generate($0, node: node))" }) ?? ""
         return "{\n" + "\(generate(block.getter, node: node))\(setterStr)".indent + "\n}"
     }
-    
+
     open func generate(_ block: GetterSetterKeywordBlock, node: ASTNode) -> String {
         let setterStr = block.setter.map({ "\n\(generate($0, node: node).indent)" }) ?? ""
         return "{\n\(generate(block.getter, node: node).indent)\(setterStr)\n}"
     }
-    
+
     open func generate(_ block: WillSetDidSetBlock.WillSetClause, node: ASTNode) -> String {
         let attrsText = block.attributes.isEmpty ? "" : "\(generate(block.attributes, node: node)) "
         let nameText = block.name.map({ "(\($0))" }) ?? ""
         return "\(attrsText)willSet\(nameText) \(generate(block.codeBlock))"
     }
-    
+
     open func generate(_ block: WillSetDidSetBlock.DidSetClause, node: ASTNode) -> String {
         let attrsText = block.attributes.isEmpty ? "" : "\(generate(block.attributes, node: node)) "
         let nameText = block.name.map({ "(\($0))" }) ?? ""
         return "\(attrsText)didSet\(nameText) \(generate(block.codeBlock))"
     }
-    
+
     open func generate(_ block: WillSetDidSetBlock, node: ASTNode) -> String {
         let willSetClauseStr = block.willSetClause.map({ "\n\(generate($0, node: node).indent)" }) ?? ""
         let didSetClauseStr = block.didSetClause.map({ "\n\(generate($0, node: node).indent)" }) ?? ""
         return "{\(willSetClauseStr)\(didSetClauseStr)\n}"
     }
-    
+
     open func generate(_ clause: GetterSetterKeywordBlock.GetterKeywordClause, node: ASTNode) -> String {
         let attrsText = clause.attributes.isEmpty ? "" : "\(generate(clause.attributes, node: node)) "
         let modifierText = clause.mutationModifier.map({ "\(generate($0)) " }) ?? ""
         return "\(attrsText)\(modifierText)get"
     }
-    
+
     open func generate(_ clause: GetterSetterKeywordBlock.SetterKeywordClause, node: ASTNode) -> String {
         let attrsText = clause.attributes.isEmpty ? "" : "\(generate(clause.attributes, node: node)) "
         let modifierText = clause.mutationModifier.map({ "\(generate($0)) " }) ?? ""
         return "\(attrsText)\(modifierText)set"
     }
-    
+
     open func generate(_ patternInitializer: PatternInitializer, node: ASTNode) -> String {
         let pttrnText = generate(patternInitializer.pattern, node: node)
         guard let initExpr = patternInitializer.initializerExpression else {
@@ -138,11 +138,11 @@ extension Tokenizer {
         }
         return "\(pttrnText) = \(generate(initExpr))"
     }
-    
+
     open func generate(_ initializers: [PatternInitializer], node: ASTNode) -> String {
         return initializers.map { generate($0, node: node) }.joined(separator: ", ")
     }
-    
+
     open func generate(_ member: ClassDeclaration.Member) -> String {
         switch member {
         case .declaration(let decl):
@@ -151,7 +151,7 @@ extension Tokenizer {
             return generate(stmt)
         }
     }
-    
+
     open func generate(_ declaration: ClassDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let modifierText = declaration.accessLevelModifier.map({ "\(generate($0)) " }) ?? ""
@@ -165,18 +165,18 @@ extension Tokenizer {
         let memberText = declaration.members.isEmpty ? "" : "\n\(membersText.indent)\n"
         return "\(headText)\(neckText) {" + memberText + "}"
     }
-    
+
     open func generate(_ constant: ConstantDeclaration) -> String {
         let attrsText = constant.attributes.isEmpty ? "" : "\(generate(constant.attributes, node: constant)) "
         let modifiersText = constant.modifiers.isEmpty ? "" : "\(generate(constant.modifiers)) "
         return "\(attrsText)\(modifiersText)let \(generate(constant.initializerList, node: constant))"
     }
-    
+
     open func generate(_ declaration: DeinitializerDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         return "\(attrsText)deinit \(generate(declaration.body))"
     }
-    
+
     open func generate(_ member: EnumDeclaration.Member, node: ASTNode) -> String {
         switch member {
         case .declaration(let decl):
@@ -189,14 +189,14 @@ extension Tokenizer {
             return generate(stmt)
         }
     }
-    
+
     open func generate(_ union: EnumDeclaration.UnionStyleEnumCase, node: ASTNode) -> String {
         let attrsText = union.attributes.isEmpty ? "" : "\(generate(union.attributes, node: node)) "
         let indirectText = union.isIndirect ? "indirect " : ""
         let casesText = union.cases.map({ "\($0.name)\($0.tuple.map { generate($0, node: node) } ?? "")" }).joined(separator: ", ")
         return "\(attrsText)\(indirectText)case \(casesText)"
     }
-    
+
     open func generate(_ raw: EnumDeclaration.RawValueStyleEnumCase, node: ASTNode) -> String {
         let attrsText = raw.attributes.isEmpty ? "" : "\(generate(raw.attributes, node: node)) "
         let casesText = raw.cases.map { c -> String in
@@ -219,7 +219,7 @@ extension Tokenizer {
         }
         return "\(attrsText)case \(casesText.joined(separator: ", "))"
     }
-    
+
     open func generate(_ declaration: EnumDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let modifierText = declaration.accessLevelModifier.map({ "\(generate($0)) " }) ?? ""
@@ -233,7 +233,7 @@ extension Tokenizer {
         let memberText = declaration.members.isEmpty ? "" : "\n\(membersText.indent)\n"
         return "\(headText)\(neckText) {\(memberText)}"
     }
-    
+
     open func generate(_ member: ExtensionDeclaration.Member) -> String {
         switch member {
         case .declaration(let decl):
@@ -242,7 +242,7 @@ extension Tokenizer {
             return generate(stmt)
         }
     }
-    
+
     open func generate(_ declaration: ExtensionDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let modifierText = declaration.accessLevelModifier.map({ "\(generate($0)) " }) ?? ""
@@ -254,7 +254,7 @@ extension Tokenizer {
         let memberText = declaration.members.isEmpty ? "" : "\n\(membersText.indent)\n"
         return "\(headText)\(neckText) {\(memberText)}"
     }
-    
+
     open func generate(_ declaration: FunctionDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let modifiersText = declaration.modifiers.isEmpty ? "" : "\(generate(declaration.modifiers)) "
@@ -265,7 +265,7 @@ extension Tokenizer {
         let bodyText = declaration.body.map({ " \(generate($0))" }) ?? ""
         return "\(headText) \(declaration.name)\(genericParamText)\(signatureText)\(genericWhereText)\(bodyText)"
     }
-    
+
     open func generate(_ parameter: FunctionSignature.Parameter, node: ASTNode) -> String {
         let externalNameText = parameter.externalName.map({ [$0] }) ?? []
         let localNameText = parameter.localName.isEmpty ? [] : [parameter.localName]
@@ -275,7 +275,7 @@ extension Tokenizer {
         let varargsText = parameter.isVarargs ? "..." : ""
         return "\(nameText)\(typeAnnoText)\(defaultText)\(varargsText)"
     }
-    
+
     open func generate(_ signature: FunctionSignature, node: ASTNode) -> String {
         let parameterText = ["(\(signature.parameterList.map { generate($0, node: node) }.joined(separator: ", ")))"]
         let throwsKindText = [tokenize(signature.throwsKind, node: node).joinedValues()].filter { $0.count > 0 }
@@ -294,14 +294,14 @@ extension Tokenizer {
         }
         return "-> \(generate(result.attributes, node: node)) \(typeText)"
     }
-    
+
     open func generate(_ declaration: ImportDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let kindText = declaration.kind.map({ " \($0.rawValue)" }) ?? ""
         let pathText = declaration.path.joined(separator: ".")
         return "\(attrsText)import\(kindText) \(pathText)"
     }
-    
+
     open func generate(_ declaration: InitializerDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let modifiersText = declaration.modifiers.isEmpty ? "" : "\(generate(declaration.modifiers)) "
@@ -315,7 +315,7 @@ extension Tokenizer {
         let bodyText = generate(declaration.body)
         return "\(headText)\(genericParamText)\(parameterText)\(throwsKindText)\(genericWhereText) \(bodyText)"
     }
-    
+
     open func generate(_ declaration: InitializerDeclaration.InitKind) -> String {
         switch declaration {
         case .nonfailable:
@@ -326,7 +326,7 @@ extension Tokenizer {
             return "!"
         }
     }
-    
+
     open func generate(_ declaration: OperatorDeclaration) -> String {
         switch declaration.kind {
         case .prefix(let op):
@@ -339,13 +339,13 @@ extension Tokenizer {
             return "infix operator \(op) : \(id)"
         }
     }
-    
+
     open func generate(_ declaration: PrecedenceGroupDeclaration) -> String {
         let attrsText = declaration.attributes.map(generate).joined(separator: "\n")
         let attrsBlockText = declaration.attributes.isEmpty ? "{}" : "{\n\(attrsText.indent)\n}"
         return "precedencegroup \(declaration.name) \(attrsBlockText)"
     }
-    
+
     open func generate(_ attribute: PrecedenceGroupDeclaration.Attribute) -> String {
         switch attribute {
         case .higherThan(let ids):
@@ -363,7 +363,7 @@ extension Tokenizer {
             return "associativity: none"
         }
     }
-    
+
     open func generate(_ declaration: ProtocolDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let modifierText = declaration.accessLevelModifier.map({ "\(generate($0)) " }) ?? ""
@@ -373,7 +373,7 @@ extension Tokenizer {
         let memberText = declaration.members.isEmpty ? "" : "\n\(membersText.indent)\n"
         return "\(headText)\(typeText) {\(memberText)}"
     }
-    
+
     open func generate(_ member: ProtocolDeclaration.Member, node: ASTNode) -> String {
         switch member {
         case .property(let member):
@@ -390,14 +390,14 @@ extension Tokenizer {
             return generate(stmt)
         }
     }
-    
+
     open func generate(_ member: ProtocolDeclaration.PropertyMember, node: ASTNode) -> String {
         let attrsText = member.attributes.isEmpty ? "" : "\(generate(member.attributes, node: node)) "
         let modifiersText = member.modifiers.isEmpty ? "" : "\(generate(member.modifiers)) "
         let blockText = generate(member.getterSetterKeywordBlock, node: node)
         return "\(attrsText)\(modifiersText)var \(member.name)\(member.typeAnnotation) \(blockText)"
     }
-    
+
     open func generate(_ member: ProtocolDeclaration.MethodMember, node: ASTNode) -> String {
         let attrsText = member.attributes.isEmpty ? "" : "\(generate(member.attributes, node: node)) "
         let modifiersText = member.modifiers.isEmpty ? "" : "\(generate(member.modifiers)) "
@@ -407,7 +407,7 @@ extension Tokenizer {
         let genericWhereClauseText = member.genericWhere.map({ " \(generate($0, node: node))" }) ?? ""
         return "\(headText) \(member.name)\(genericParameterClauseText)\(signatureText)\(genericWhereClauseText)"
     }
-    
+
     open func generate(_ member: ProtocolDeclaration.InitializerMember, node: ASTNode) -> String {
         let attrsText = member.attributes.isEmpty ? "" : "\(generate(member.attributes, node: node)) "
         let modifiersText = member.modifiers.isEmpty ? "" : "\(generate(member.modifiers)) "
@@ -420,22 +420,22 @@ extension Tokenizer {
         let genericWhereClauseText = member.genericWhere.map({ " \(generate($0, node: node))" }) ?? ""
         return "\(headText)\(genericParameterClauseText)\(parameterText)\(throwsKindText)\(genericWhereClauseText)"
     }
-    
+
     open func generate(_ member: ProtocolDeclaration.SubscriptMember, node: ASTNode) -> String {
         let attrsText = member.attributes.isEmpty ? "" : "\(generate(member.attributes, node: node)) "
         let modifiersText = member.modifiers.isEmpty ? "" : "\(generate(member.modifiers)) "
         let genericParamClauseText = member.genericParameter.map { generate($0, node: node) } ?? ""
         let parameterText = "(\(member.parameterList.map { generate($0, node: node) }.joined(separator: ", ")))"
         let headText = "\(attrsText)\(modifiersText)subscript\(genericParamClauseText)\(parameterText)"
-        
+
         let resultAttrsText = member.resultAttributes.isEmpty ? "" : "\(generate(member.resultAttributes, node: node)) "
         let resultText = "-> \(resultAttrsText)\(generate(member.resultType, node: node))"
-        
+
         let genericWhereClauseText = member.genericWhere.map({ " \(generate($0, node: node))" }) ?? ""
-        
+
         return "\(headText) \(resultText)\(genericWhereClauseText) \(generate(member.getterSetterKeywordBlock, node: node))"
     }
-    
+
     open func generate(_ member: ProtocolDeclaration.AssociativityTypeMember, node: ASTNode) -> String {
         let attrsText = member.attributes.isEmpty ? "" : "\(generate(member.attributes, node: node)) "
         let modifierText = member.accessLevelModifier.map({ "\(generate($0)) " }) ?? ""
@@ -444,7 +444,7 @@ extension Tokenizer {
         let genericWhereText = member.genericWhere.map({ " \(generate($0, node: node))" }) ?? ""
         return "\(attrsText)\(modifierText)associatedtype \(member.name)\(typeText)\(assignmentText)\(genericWhereText)"
     }
-    
+
     open func generate(_ declaration: StructDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let modifierText = declaration.accessLevelModifier.map({ "\(generate($0)) " }) ?? ""
@@ -457,7 +457,7 @@ extension Tokenizer {
         let memberText = declaration.members.isEmpty ? "" : "\n\(membersText.indent)\n"
         return "\(headText)\(neckText) {\(memberText)}"
     }
-    
+
     open func generate(_ member: StructDeclaration.Member) -> String {
         switch member {
         case .declaration(let decl):
@@ -466,22 +466,22 @@ extension Tokenizer {
             return generate(stmt)
         }
     }
-    
+
     open func generate(_ declaration: SubscriptDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let modifiersText = declaration.modifiers.isEmpty ? "" : "\(generate(declaration.modifiers)) "
         let genericParamClauseText = declaration.genericParameterClause.map { generate($0, node: declaration) } ?? ""
         let parameterText = "(\(declaration.parameterList.map { generate($0, node: declaration) }.joined(separator: ", ")))"
         let headText = "\(attrsText)\(modifiersText)subscript\(genericParamClauseText)\(parameterText)"
-        
+
         let resultAttrsText = declaration.resultAttributes.isEmpty ? "" : "\(generate(declaration.resultAttributes, node: declaration)) "
         let resultText = "-> \(resultAttrsText)\(generate(declaration.resultType, node: declaration))"
-        
+
         let genericWhereClauseText = declaration.genericWhereClause.map({ " \(generate($0, node: declaration))" }) ?? ""
-        
+
         return "\(headText) \(resultText)\(genericWhereClauseText) \(generate(declaration.body, node: declaration))"
     }
-    
+
     open func generate(_ body: SubscriptDeclaration.Body, node: ASTNode) -> String {
         switch body {
         case .codeBlock(let block):
@@ -492,7 +492,7 @@ extension Tokenizer {
             return generate(block, node: node)
         }
     }
-    
+
     open func generate(_ declaration: TypealiasDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let modifierText = declaration.accessLevelModifier.map({ "\(generate($0)) " }) ?? ""
@@ -500,13 +500,13 @@ extension Tokenizer {
         let assignmentText = generate(declaration.assignment, node: declaration)
         return "\(attrsText)\(modifierText)typealias \(declaration.name)\(genericText) = \(assignmentText)"
     }
-    
+
     open func generate(_ declaration: VariableDeclaration) -> String {
         let attrsText = declaration.attributes.isEmpty ? "" : "\(generate(declaration.attributes, node: declaration)) "
         let modifiersText = declaration.modifiers.isEmpty ? "" : "\(generate(declaration.modifiers)) "
         return "\(attrsText)\(modifiersText)var \(generate(declaration.body, node: declaration))"
     }
-    
+
     open func generate(_ body: VariableDeclaration.Body, node: ASTNode) -> String {
         switch body {
         case .initializerList(let inits):
@@ -523,11 +523,11 @@ extension Tokenizer {
             return "\(name)\(typeAnnoStr)\(initStr) \(generate(block, node: node))"
         }
     }
-    
+
     open func generate(_ modifiers: [DeclarationModifier]) -> String {
         return modifiers.map(generate).joined(separator: " ")
     }
-    
+
     open func generate(_ modifier: DeclarationModifier) -> String {
         switch modifier {
         case .class:
@@ -568,11 +568,11 @@ extension Tokenizer {
             return generate(modifier)
         }
     }
-    
+
     open func generate(_ modifier: AccessLevelModifier) -> String {
         return modifier.rawValue
     }
-    
+
     open func generate(_ modifier: MutationModifier) -> String {
         return modifier.rawValue
     }

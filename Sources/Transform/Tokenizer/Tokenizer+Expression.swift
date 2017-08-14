@@ -1,18 +1,18 @@
 /*
- Copyright 2017 Ryuichi Laboratories and the Yanagiba project contributors
- 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- 
- http://www.apache.org/licenses/LICENSE-2.0
- 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+   Copyright 2017 Ryuichi Laboratories and the Yanagiba project contributors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 
 import AST
 
@@ -79,13 +79,13 @@ extension Tokenizer {
                           value: expression.textDescription)]
         }
     }
-    
+
     open func tokenize(_ expression: AssignmentOperatorExpression) -> [Token] {
         return tokenize(expression.leftExpression) +
             expression.newToken(.symbol, " = ") +
             tokenize(expression.rightExpression)
     }
-    
+
     open func tokenize(_ expression: BinaryOperatorExpression) -> [Token] {
         return [
             tokenize(expression.leftExpression),
@@ -126,18 +126,17 @@ extension Tokenizer {
             expression.newToken(.endOfScope, "}")        
     }
 
-    
     open func tokenize(_ expression: ClosureExpression.Signature.CaptureItem, node: ASTNode) -> [Token] {
         return [
             expression.specifier.map { tokenize($0, node: node) } ?? [],
             tokenize(expression.expression)
         ].joined(token: expression.newToken(.space, " ", node))
     }
-    
+
     open func tokenize(_ expression: ClosureExpression.Signature.CaptureItem.Specifier, node: ASTNode) -> [Token] {
         return [expression.newToken(.identifier, expression.rawValue, node)]
     }
-    
+
     open func tokenize(_ expression: ClosureExpression.Signature.ParameterClause, node: ASTNode) -> [Token] {
         switch expression {
         case .parameterList(let params):
@@ -148,7 +147,7 @@ extension Tokenizer {
             return [expression.newToken(.identifier, idList.textDescription, node)]
         }
     }
-    
+
     open func tokenize(_ expression: ClosureExpression.Signature.ParameterClause.Parameter, node: ASTNode) -> [Token] {
         return expression.newToken(.identifier, expression.name, node) +
             expression.typeAnnotation.map { typeAnnotation in
@@ -173,7 +172,7 @@ extension Tokenizer {
             resultTokens,
         ].joined(token: expression.newToken(.space, " ", node))
     }
-    
+
     open func tokenize(_ expression: ExplicitMemberExpression) -> [Token] {
         switch expression.kind {
         case let .tuple(postfixExpr, index):
@@ -190,7 +189,7 @@ extension Tokenizer {
             return tokenize(postfixExpr) + expression.newToken(.delimiter, ".") + expression.newToken(.identifier, identifier) + argumentTokens
         }
     }
-    
+
     open func tokenize(_ expression: ForcedValueExpression) -> [Token] {
         return tokenize(expression.postfixExpression) + expression.newToken(.symbol, "!")
     }
@@ -234,7 +233,7 @@ extension Tokenizer {
                 expression.newToken(.symbol, op, node)
         }
     }
-    
+
     open func tokenize(_ expression: IdentifierExpression) -> [Token] {
         switch expression.kind {
         case let .identifier(id, generic):
@@ -245,15 +244,15 @@ extension Tokenizer {
                 generic.map { tokenize($0, node: expression) }
         }
     }
-    
+
     open func tokenize(_ expression: ImplicitMemberExpression) -> [Token] {
         return expression.newToken(.symbol, ".") + expression.newToken(.identifier, expression.identifier)
     }
-    
+
     open func tokenize(_ expression: InOutExpression) -> [Token] {
         return expression.newToken(.symbol, "&") + expression.newToken(.identifier, expression.identifier)
     }
-    
+
     open func tokenize(_ expression: InitializerExpression) -> [Token] {
         var tokens = tokenize(expression.postfixExpression) +
             expression.newToken(.identifier, ".init")
@@ -269,14 +268,14 @@ extension Tokenizer {
         }
         return tokens
     }
-    
+
     open func tokenize(_ expression: KeyPathStringExpression) -> [Token] {
         return expression.newToken(.keyword, "#keyPath") +
             expression.newToken(.startOfScope, "(") +
             tokenize(expression.expression) +
             expression.newToken(.endOfScope, ")")
     }
-    
+
     open func tokenize(_ expression: LiteralExpression) -> [Token] {
         switch expression.kind {
         case .nil:
@@ -307,33 +306,33 @@ extension Tokenizer {
                 .suffix(with: expression.newToken(.endOfScope, "]"))
         }
     }
-    
+
     open func tokenize(_ expression: OptionalChainingExpression) -> [Token] {
         return tokenize(expression.postfixExpression) + expression.newToken(.symbol, "?")
     }
-    
+
     open func tokenize(_ expression: ParenthesizedExpression) -> [Token] {
         return tokenize(expression.expression)
             .prefix(with: expression.newToken(.startOfScope, "("))
             .suffix(with: expression.newToken(.endOfScope, ")"))
     }
-    
+
     open func tokenize(_ expression: PostfixOperatorExpression) -> [Token] {
         return tokenize(expression.postfixExpression) +
             expression.newToken(.symbol, expression.postfixOperator)
     }
-    
+
     open func tokenize(_ expression: PostfixSelfExpression) -> [Token] {
         return tokenize(expression.postfixExpression) +
             expression.newToken(.symbol, ".") +
             expression.newToken(.keyword, "self")
     }
-    
+
     open func tokenize(_ expression: PrefixOperatorExpression) -> [Token] {
         return expression.newToken(.symbol, expression.prefixOperator) +
             tokenize(expression.postfixExpression)
     }
-    
+
     open func tokenize(_ expression: SelectorExpression) -> [Token] {
         switch expression.kind {
         case .selector(let expr):
@@ -372,7 +371,7 @@ extension Tokenizer {
                 [expression.newToken(.endOfScope, ")")]
         }
     }
-    
+
     open func tokenize(_ expression: SelfExpression) -> [Token] {
         switch expression.kind {
         case .self:
@@ -392,14 +391,14 @@ extension Tokenizer {
                 expression.newToken(.keyword, "init")
         }
     }
-    
+
     open func tokenize(_ expression: SubscriptExpression) -> [Token] {
         return tokenize(expression.postfixExpression) +
                 expression.newToken(.startOfScope, "[") +
             expression.arguments.map { tokenize($0, node: expression) }.joined(token: expression.newToken(.delimiter, ", ")) +
                 expression.newToken(.endOfScope, "]")
     }
-    
+
     open func tokenize(_ expression: SuperclassExpression) -> [Token] {
         switch expression.kind {
         case .method(let name):
@@ -427,7 +426,7 @@ extension Tokenizer {
             tokenize(expression.falseExpression)
         ].joined(token: expression.newToken(.space, " "))
     }
-    
+
     open func tokenize(_ expression: TryOperatorExpression) -> [Token] {
         switch expression.kind {
         case .try(let expr):
@@ -447,13 +446,13 @@ extension Tokenizer {
                 tokenize(expr)
         }
     }
-    
+
     open func tokenize(_ expression: TupleExpression) -> [Token] {
         if expression.elementList.isEmpty {
             return expression.newToken(.startOfScope, "(") +
                 expression.newToken(.endOfScope, ")")
         }
-        
+
         return expression.elementList.map { element in
             var idTokens = [Token]()
             if let id = element.identifier {
@@ -465,7 +464,7 @@ extension Tokenizer {
         .prefix(with: expression.newToken(.startOfScope, "("))
         .suffix(with: expression.newToken(.endOfScope, ")"))
     }
-    
+
     open func tokenize(_ expression: TypeCastingOperatorExpression) -> [Token] {
         let exprTokens: [Token]
         let operatorTokens: [Token]
@@ -494,13 +493,13 @@ extension Tokenizer {
             typeTokens
         ].joined(token: expression.newToken(.space, " "))
     }
-    
+
     open func tokenize(_ expression: WildcardExpression) -> [Token] {
         return [expression.newToken(.symbol, "_")]
     }
-    
+
     // MARK: Utils
-    
+
     open func tokenize(_ entry: DictionaryEntry, node: ASTNode) -> [Token] {
         return tokenize(entry.key) +
             entry.newToken(.delimiter, ": ", node) +
@@ -512,14 +511,13 @@ extension Tokenizer {
             return arg.newToken(.identifier, id, node) + arg.newToken(.delimiter, ": ", node)
         } + tokenize(arg.expression)
     }
-    
+
     // TODO: Delete generate methods
     open func generate(_ expression: Expression) -> String {
         return tokenize(expression).joinedValues()
     }
 
 }
-
 
 extension ClosureExpression.Signature: ASTTokenizable {}
 extension ClosureExpression.Signature.CaptureItem: ASTTokenizable {}

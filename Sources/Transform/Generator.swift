@@ -17,9 +17,17 @@
 import AST
 
 open class Generator {
-  let _formats: [String: Any]?
+  let _options: [String: Any]?
+  let _tokenizer: Tokenizer
+  let _tokenJoiner: TokenJoiner
 
-  public init(formats: [String: Any]? = nil) {
-    _formats = formats
+  public init(
+    options: [String: Any]? = nil,
+    tokenizer: Tokenizer = Tokenizer(),
+    tokenJoiner: TokenJoiner = TokenJoiner())
+  {
+    _options = options
+    _tokenizer = tokenizer
+    _tokenJoiner = tokenJoiner
   }
 }
